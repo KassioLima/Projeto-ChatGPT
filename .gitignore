@@ -1,4 +1,5 @@
 # compiled output
+BDconversas.db
 /dist
 /node_modules
 .env
