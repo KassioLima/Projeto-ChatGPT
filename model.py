@@ -17,8 +17,8 @@ class lista_conversas(BaseModel):
     """
     # A tabela possui apenas o campo 'name', que receberá o nome do autor sera unico
     chat_id = peewee.IntegerField()
-    assunto = peewee.CharField()
-    conversa = peewee.CharField()
+    assunto = peewee.CharField(null=True)
+    conversa = peewee.CharField(null=True)
 
 class conversa_atual(BaseModel):
 
@@ -27,8 +27,8 @@ class conversa_atual(BaseModel):
     """
     # A tabela possui apenas o campo 'name', que receberá o nome do autor sera unico
     chat_id = peewee.IntegerField(unique=True)
-    assunto = peewee.IntegerField()
-    flag = peewee.BooleanField()
+    assunto = peewee.IntegerField(null=True)
+    flag = peewee.BooleanField(null=True)
 
 lista_conversas.create_table()
 conversa_atual.create_table()

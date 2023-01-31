@@ -48,7 +48,7 @@ async def ResponderA(mensagemRecebida: str, chat_id: int, bot):
     
     id_assunto_novo = id_assunto_atual + 1
     
-    lista_conversas.create(chat_id= chat_id, assunto= id_assunto_novo, conversa=mensagemRecebida.join(" " + resposta) )
+    lista_conversas.create(chat_id= chat_id, assunto= id_assunto_novo, conversa=mensagemRecebida + resposta )
 
     conversa_atual.create(chat_id= chat_id, assunto= id_assunto_novo, flag=True)
 
