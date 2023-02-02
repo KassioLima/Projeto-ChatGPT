@@ -2,7 +2,7 @@ import requests
 from transformers import GPT2Tokenizer
 import openai
 from os import getenv
-from model import lista_conversas, conversa_atual
+from model import Conversas, Mensagens, db
 from peewee import fn
 
 async def ResponderAComContexto(chat_id: int, bot, conversa):
@@ -44,12 +44,12 @@ async def ResponderA(mensagemRecebida: str, chat_id: int, bot):
     response = requests.post("https://api.openai.com/v1/completions", json=params, headers=headers)
     resposta = response.json()["choices"][0]["text"]
 
-    id_assunto_atual = lista_conversas.select(fn.Max(lista_conversas.assunto)).get()
-    
-    id_assunto_novo = id_assunto_atual + 1
-    
-    lista_conversas.create(chat_id= chat_id, assunto= id_assunto_novo, conversa=mensagemRecebida + resposta )
-
-    conversa_atual.create(chat_id= chat_id, assunto= id_assunto_novo, flag=True)
+    # id_assunto_atual = lista_conversas.select(fn.Max(lista_conversas.assunto)).get()
+    #
+    # id_assunto_novo = id_assunto_atual + 1
+    #
+    # lista_conversas.create(chat_id= chat_id, assunto= id_assunto_novo, conversa=mensagemRecebida + resposta )
+    #
+    # conversa_atual.create(chat_id= chat_id, assunto= id_assunto_novo, flag=True)
 
     await bot.send_message(chat_id=chat_id, text=resposta)

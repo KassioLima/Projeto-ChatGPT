@@ -1,3 +1,4 @@
+import datetime
 import peewee
 
 db = peewee.SqliteDatabase('BDconversas.db')
@@ -10,25 +11,25 @@ class BaseModel(peewee.Model):
         # utilizamos o banco 'codigo_avulso.db' criado anteriormente
         database = db
 
-class lista_conversas(BaseModel):
+class Chats(BaseModel):
+    chat_id = peewee.PrimaryKeyField(null=False)
+    aguardandoAssuntoDaConversa = peewee.BooleanField(null=False, default=False)
 
-    """
-    Classe que representa a tabela lista_conversas
-    """
-    # A tabela possui apenas o campo 'name', que receberá o nome do autor sera unico
-    chat_id = peewee.IntegerField()
-    assunto = peewee.CharField(null=True)
-    conversa = peewee.CharField(null=True)
+class Conversas(BaseModel):
+    id = peewee.PrimaryKeyField()
+    chat = peewee.ForeignKeyField(Chats, to_field='chat_id')
+    chat_id = peewee.IntegerField(null=False)
+    assunto = peewee.CharField(null=False)
+    assuntoAtual = peewee.BooleanField(null=False)
 
-class conversa_atual(BaseModel):
+class Mensagens(BaseModel):
+    id = peewee.PrimaryKeyField()
+    mensagem = peewee.CharField(null=False)
+    remetente = peewee.CharField(null=False)
+    timestamp = peewee.DateTimeField(default=datetime.datetime.now)
+    conversa = peewee.ForeignKeyField(Conversas, to_field='id')
 
-    """
-    Classe que representa a tabela conversa_atual
-    """
-    # A tabela possui apenas o campo 'name', que receberá o nome do autor sera unico
-    chat_id = peewee.IntegerField(unique=True)
-    assunto = peewee.IntegerField(null=True)
-    flag = peewee.BooleanField(null=True)
 
-lista_conversas.create_table()
-conversa_atual.create_table()
+Conversas.create_table()
+Mensagens.create_table()
+Chats.create_table()
