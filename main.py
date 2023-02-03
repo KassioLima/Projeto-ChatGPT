@@ -34,6 +34,9 @@ async def callback_handler(update, context):
         else:
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa não encontrada.")
 
+    elif objeto['action'] == "cancelar":
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Ação cancelada.")
+
 async def start(update, context):
     if Chats.select().where(Chats.chat_id == update.effective_chat.id).get_or_none() is None:
         Chats.create(chat_id=update.effective_chat.id, aguardandoAssuntoDaConversa=True)
@@ -93,6 +96,7 @@ async def apagarConversa(update, context):
         return
 
     keyboard = [[InlineKeyboardButton(conversa.assunto, callback_data='{"action": "apagar-conversa", "value": "'+str(conversa.id)+'"}')] for conversa in conversas if not conversa.assuntoAtual]
+    keyboard.append([InlineKeyboardButton("Cancelar", callback_data='{"action": "cancelar", "value": "None"}')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -107,6 +111,7 @@ async def continuarConversa(update, context):
         return
 
     keyboard = [[InlineKeyboardButton(conversa.assunto, callback_data='{"action": "continuar-conversa", "value": "' + str(conversa.id) + '"}')] for conversa in conversas if not conversa.assuntoAtual]
+    keyboard.append([InlineKeyboardButton("Cancelar", callback_data='{"action": "cancelar", "value": "None"}')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
