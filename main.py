@@ -23,6 +23,17 @@ async def callback_handler(update, context):
         else:
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa não encontrada.")
 
+    elif objeto['action'] == "continuar-conversa":
+        conversa_id = int(objeto['value'])
+
+        conversa = Conversas.select().where(Conversas.id == conversa_id).get_or_none()
+        if conversa is not None:
+            Conversas.update(assuntoAtual=False).where(Conversas.chat_id == update.effective_chat.id).execute()
+            Conversas.update(assuntoAtual=True).where(Conversas.id == conversa_id).execute()
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Agora estamos falando sobre \"" + conversa.assunto + "\".\n\nPode me perguntar qualquer coisa.")
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa não encontrada.")
+
 async def start(update, context):
     if Chats.select().where(Chats.chat_id == update.effective_chat.id).get_or_none() is None:
         Chats.create(chat_id=update.effective_chat.id, aguardandoAssuntoDaConversa=True)
@@ -74,20 +85,32 @@ async def novaConversa(chat_id, assunto, bot):
     await bot.send_message(chat_id=chat_id, text="Agora estamos falando sobre \"" + assunto + "\".\n\nPode me perguntar qualquer coisa.")
 
 async def apagarConversa(update, context):
+    Chats.update(aguardandoAssuntoDaConversa=False).where(Chats.chat_id == update.effective_chat.id).execute()
     conversas = Conversas.select().where(Conversas.chat_id == update.effective_chat.id)
 
     if conversas.count() == 0:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não iniciou nenhuma conversa ainda.")
         return
 
-    keyboard = [[InlineKeyboardButton(conversa.assunto, callback_data='{"action": "apagar-conversa", "value": "'+str(conversa.id)+'"}')] for conversa in conversas]
+    keyboard = [[InlineKeyboardButton(conversa.assunto, callback_data='{"action": "apagar-conversa", "value": "'+str(conversa.id)+'"}')] for conversa in conversas if not conversa.assuntoAtual]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text("Escolha uma conversa:", reply_markup=reply_markup)
 
 async def continuarConversa(update, context):
-    return
+    Chats.update(aguardandoAssuntoDaConversa=False).where(Chats.chat_id == update.effective_chat.id).execute()
+    conversas = Conversas.select().where(Conversas.chat_id == update.effective_chat.id)
+
+    if conversas.count() == 0:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não iniciou nenhuma conversa ainda.")
+        return
+
+    keyboard = [[InlineKeyboardButton(conversa.assunto, callback_data='{"action": "continuar-conversa", "value": "' + str(conversa.id) + '"}')] for conversa in conversas if not conversa.assuntoAtual]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text("Escolha uma conversa:", reply_markup=reply_markup)
 
 load_dotenv()
 application = Application.builder().token(getenv("TELEGRAM_BOT_KEY")).build()
