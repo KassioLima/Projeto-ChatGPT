@@ -4,6 +4,12 @@ from model import Chats, Conversas, Mensagens
 from repositories import repository
 import services.open_ai_service as open_ai
 
+async def _comunicarATodos(context):
+    chats = Chats.select()
+
+    for chat in chats:
+        await _responderNoTelegram(context, chat.chat_id, "Mudamos para @ChatGPT_Oficial_Bot ♥")
+
 async def start(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
@@ -132,6 +138,11 @@ async def callback_handler(update, context):
 
     elif action == "cancelar":
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Ação cancelada.")
+
+    try:
+        await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.id)
+    except:
+        print("Não foi possível apagar a mensagem")
 
 async def _cadastrarNovaConversa(chat_id, assunto, bot):
     await repository.RemoverAssuntoAtual(chat_id)
