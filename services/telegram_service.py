@@ -9,11 +9,11 @@ async def start(update, context):
 
     if chat is None:
         await repository.CadastrarChat(Chats(chat_id = update.effective_chat.id, aguardandoAssuntoDaConversa = True))
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Olá! Eu sou um bot do Telegram.\n\nSobre que você quer falar?")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Olá! Eu sou um bot do Telegram.\n\nSobre que você quer falar?")
     else:
         chat.aguardandoAssuntoDaConversa = False
         await repository.AtualizarChat(chat)
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Pode me perguntar qualquer coisa.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Pode me perguntar qualquer coisa.")
 
 async def mensagemRecebida(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
@@ -27,7 +27,7 @@ async def _trocarMensagem(update, context):
     conversa = await repository.ObterConversaAtualPorChatId(update.effective_chat.id)
 
     if conversa is None:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não iniciou nenhuma conversa ainda.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Você não iniciou nenhuma conversa ainda.")
         return
 
     await repository.CadastrarMensagem(Mensagens(mensagem = update.effective_message.text, remetente = update.effective_chat.first_name, conversa = conversa.id))
@@ -37,7 +37,9 @@ async def _trocarMensagem(update, context):
     resposta = await open_ai.EnviarMensagem(mensagemComContexto)
     await repository.CadastrarMensagem(Mensagens(mensagem=resposta, remetente="Chat GPT", conversa=conversa.id))
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=resposta)
+    while len(resposta) > 0:
+        await _responderNoTelegram(context.bot, update.effective_chat.id, resposta[:4096])
+        resposta = resposta[4096:]
 
 async def _obterContextoDaConversa(conversa: Conversas):
     mensagens = await repository.ObterMensagensPorConversaId(conversa.id)
@@ -70,13 +72,13 @@ async def listarConversas(update, context):
     if len(lista_conversas) == 0:
         lista_conversas = "Você não iniciou nenhuma conversa ainda."
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=lista_conversas)
+    await _responderNoTelegram(context.bot, update.effective_chat.id, lista_conversas)
 
 async def novaConversa(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
     chat.aguardandoAssuntoDaConversa = True
     await repository.AtualizarChat(chat)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Qual é o assunto da conversa?")
+    await _responderNoTelegram(context.bot, update.effective_chat.id, "Qual é o assunto da conversa?")
 
 async def apagarConversa(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
@@ -86,7 +88,7 @@ async def apagarConversa(update, context):
     conversas = await repository.ObterConversasPorChatId(update.effective_chat.id)
 
     if not conversas.count() > 0:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não iniciou nenhuma conversa ainda.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Você não iniciou nenhuma conversa ainda.")
         return
 
     keyboard = [[InlineKeyboardButton(conversa.assunto + (" (Atual)" if conversa.assuntoAtual else ""), callback_data='{"action": "apagar-conversa", "value": "'+str(conversa.id)+'"}')] for conversa in conversas]
@@ -104,7 +106,7 @@ async def continuarConversa(update, context):
     conversas = await repository.ObterConversasPorChatId(update.effective_chat.id)
 
     if not conversas.count() > 0:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não iniciou nenhuma conversa ainda.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Você não iniciou nenhuma conversa ainda.")
         return
 
     keyboard = [[InlineKeyboardButton(conversa.assunto + (" (Atual)" if conversa.assuntoAtual else ""), callback_data='{"action": "continuar-conversa", "value": "' + str(conversa.id) + '"}')] for conversa in conversas]
@@ -129,25 +131,25 @@ async def callback_handler(update, context):
         await _continuarConversa(update, context, conversa_id)
 
     elif action == "cancelar":
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Ação cancelada.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Ação cancelada.")
 
 async def _cadastrarNovaConversa(chat_id, assunto, bot):
     await repository.RemoverAssuntoAtual(chat_id)
     await repository.CadastrarConversa(Conversas(chat_id=chat_id, assunto=assunto, assuntoAtual=True))
-    await bot.send_message(chat_id=chat_id, text="Agora estamos falando sobre \"" + assunto + "\".\n\nPode me perguntar qualquer coisa.")
+    await _responderNoTelegram(bot, chat_id, "Agora estamos falando sobre \"" + assunto + "\".\n\nPode me perguntar qualquer coisa.")
 
 async def _apagarConversa(update, context, conversa_id):
     conversa = await repository.ObterConversaPorId(conversa_id)
 
     if conversa is not None:
         if conversa.assuntoAtual:
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não pode apagar a conversa atual.")
+            await _responderNoTelegram(context.bot, update.effective_chat.id, "Você não pode apagar a conversa atual.")
         else:
             Mensagens.delete().where(Mensagens.conversa_id == conversa_id).execute()
             Conversas.delete().where(Conversas.id == conversa_id).execute()
-            await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa apagada")
+            await _responderNoTelegram(context.bot, update.effective_chat.id, "Conversa apagada")
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa não encontrada.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Conversa não encontrada.")
 
 async def _continuarConversa(update, context, conversa_id):
     conversa = await repository.ObterConversaPorId(conversa_id)
@@ -155,6 +157,13 @@ async def _continuarConversa(update, context, conversa_id):
     if conversa is not None:
         Conversas.update(assuntoAtual=False).where(Conversas.chat_id == update.effective_chat.id).execute()
         Conversas.update(assuntoAtual=True).where(Conversas.id == conversa_id).execute()
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Agora estamos falando sobre \"" + conversa.assunto + "\".\n\nPode me perguntar qualquer coisa.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Agora estamos falando sobre \"" + conversa.assunto + "\".\n\nPode me perguntar qualquer coisa.")
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa não encontrada.")
+        await _responderNoTelegram(context.bot, update.effective_chat.id, "Conversa não encontrada.")
+
+async def _responderNoTelegram(bot, chat_id, mensagem):
+    try:
+        await bot.send_message(chat_id=chat_id, text=mensagem)
+    except:
+        print("Erro ao enviar mensagem no Telegram. Tentando novamente")
+        await _responderNoTelegram(bot, chat_id, mensagem)
