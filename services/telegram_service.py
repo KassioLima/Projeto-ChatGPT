@@ -4,12 +4,6 @@ from model import Chats, Conversas, Mensagens
 from repositories import repository
 import services.open_ai_service as open_ai
 
-async def _comunicarATodos(context):
-    chats = Chats.select()
-
-    for chat in chats:
-        await _responderNoTelegram(context, chat.chat_id, "Mudamos para @ChatGPT_Oficial_Bot ♥")
-
 async def start(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
@@ -17,9 +11,16 @@ async def start(update, context):
         await repository.CadastrarChat(Chats(chat_id = update.effective_chat.id, aguardandoAssuntoDaConversa = True))
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Olá! Eu sou um bot do Telegram.\n\nSobre que você quer falar?")
     else:
-        chat.aguardandoAssuntoDaConversa = False
-        await repository.AtualizarChat(chat)
-        await _responderNoTelegram(context.bot, update.effective_chat.id, "Pode me perguntar qualquer coisa.")
+        conversa = await repository.ObterConversaAtualPorChatId(chat.chat_id)
+
+        if conversa is not None:
+            chat.aguardandoAssuntoDaConversa = False
+            await repository.AtualizarChat(chat)
+            await _responderNoTelegram(context.bot, update.effective_chat.id, "Estávamos falando sobre " + conversa.assunto + ".\n\nPode me perguntar qualquer coisa.")
+        else:
+            chat.aguardandoAssuntoDaConversa = True
+            await repository.AtualizarChat(chat)
+            await _responderNoTelegram(context.bot, update.effective_chat.id, "Sobre que você quer falar?")
 
 async def mensagemRecebida(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
