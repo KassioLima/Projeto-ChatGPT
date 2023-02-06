@@ -15,7 +15,7 @@ async def ObterConversasPorChatId(chat_id: int):
     return conversas
 
 async def ObterConversaAtualPorChatId(chat_id: int):
-    conversa = Conversas.select().where(Conversas.chat_id == chat_id and Conversas.assuntoAtual).get_or_none()
+    conversa = Conversas.select().where(Conversas.chat_id == chat_id).where(Conversas.assuntoAtual).get_or_none()
     return conversa
 
 async def ObterConversaPorId(id: int):
