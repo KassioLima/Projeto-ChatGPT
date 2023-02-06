@@ -18,7 +18,7 @@ async def start(update, context):
 async def mensagemRecebida(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
-    if chat.EstaAguardandoAlgo():
+    if chat.aguardandoAssuntoDaConversa:
         await _verificaOQueEstaSendoAguardado(update, context, chat)
     else:
         await _trocarMensagem(update, context)

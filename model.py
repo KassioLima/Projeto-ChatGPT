@@ -1,5 +1,6 @@
 import datetime
 import peewee
+from peewee import BooleanField
 
 db = peewee.SqliteDatabase('BDconversas.db')
 
@@ -10,9 +11,6 @@ class BaseModel(peewee.Model):
 class Chats(BaseModel):
     chat_id = peewee.PrimaryKeyField(null=False)
     aguardandoAssuntoDaConversa = peewee.BooleanField(default=False, null=False)
-
-    def EstaAguardandoAlgo(self) -> bool:
-        return self.aguardandoAssuntoDaConversa
 
 class Conversas(BaseModel):
     id = peewee.PrimaryKeyField()
