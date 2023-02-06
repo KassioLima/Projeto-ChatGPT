@@ -26,6 +26,10 @@ async def mensagemRecebida(update, context):
 async def _trocarMensagem(update, context):
     conversa = await repository.ObterConversaAtualPorChatId(update.effective_chat.id)
 
+    if conversa is None:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não iniciou nenhuma conversa ainda.")
+        return
+
     await repository.CadastrarMensagem(Mensagens(mensagem = update.effective_message.text, remetente = update.effective_chat.first_name, conversa = conversa.id))
 
     mensagemComContexto = await _obterContextoDaConversa(conversa)
@@ -75,6 +79,10 @@ async def novaConversa(update, context):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Qual é o assunto da conversa?")
 
 async def apagarConversa(update, context):
+    chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+    chat.aguardandoAssuntoDaConversa = False
+    await repository.AtualizarChat(chat)
+
     conversas = await repository.ObterConversasPorChatId(update.effective_chat.id)
 
     if not conversas.count() > 0:
@@ -89,6 +97,10 @@ async def apagarConversa(update, context):
     await update.message.reply_text("Escolha uma conversa:", reply_markup=reply_markup)
 
 async def continuarConversa(update, context):
+    chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+    chat.aguardandoAssuntoDaConversa = False
+    await repository.AtualizarChat(chat)
+
     conversas = await repository.ObterConversasPorChatId(update.effective_chat.id)
 
     if not conversas.count() > 0:
