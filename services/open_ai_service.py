@@ -20,7 +20,6 @@ def cortarMensagemParaCaberNosTokens(mensagem) -> str:
         mensagemCortada = tokenizer.decode(tokens_ids)
         return mensagemCortada
 
-
 async def EnviarMensagem(mensagemRecebida: str) -> str:
     n_tokens = _contarTokens(mensagemRecebida)
 
