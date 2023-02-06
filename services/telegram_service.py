@@ -129,9 +129,9 @@ async def _apagarConversa(update, context, conversa_id):
 
     if conversa is not None:
         if conversa.assuntoAtual:
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="Você não pode apagar a conversa atual.")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Você não pode apagar a conversa atual.")
         else:
+            Mensagens.delete().where(Mensagens.conversa_id == conversa_id).execute()
             Conversas.delete().where(Conversas.id == conversa_id).execute()
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Conversa apagada")
     else:
