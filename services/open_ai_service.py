@@ -43,7 +43,19 @@ async def EnviarMensagem(mensagemRecebida: str) -> str:
 
     try:
         response = requests.post("https://api.openai.com/v1/completions", json=params, headers=headers, timeout=(60 * 5))
-        resposta = response.json()["choices"][0]["text"]
+        resposta = str(response.json()["choices"][0]["text"])
+
+        if resposta.startswith("\nR: "):
+            resposta = resposta[len("\nR: "):]
+
+        elif resposta.startswith("R: "):
+            resposta = resposta[len("R: "):]
+
+        elif resposta.startswith("\nResposta: "):
+            resposta = resposta[len("\nResposta: "):]
+
+        elif resposta.startswith("Resposta: "):
+            resposta = resposta[len("Resposta: "):]
     except:
         resposta = "Desculpe, não consegui pensar em uma resposta 😕"
 
