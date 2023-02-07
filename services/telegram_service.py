@@ -16,7 +16,7 @@ async def start(update, context):
         if conversa is not None:
             chat.aguardandoAssuntoDaConversa = False
             await repository.AtualizarChat(chat)
-            await _responderNoTelegram(context.bot, update.effective_chat.id, "Estávamos falando sobre " + conversa.assunto + ".\n\nPode me perguntar qualquer coisa.")
+            await _responderNoTelegram(context.bot, update.effective_chat.id, "Estávamos falando sobre \"" + conversa.assunto + "\".\n\nPode me perguntar qualquer coisa.")
         else:
             chat.aguardandoAssuntoDaConversa = True
             await repository.AtualizarChat(chat)
@@ -25,10 +25,20 @@ async def start(update, context):
 async def mensagemRecebida(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
-    if chat.aguardandoAssuntoDaConversa:
-        await _verificaOQueEstaSendoAguardado(update, context, chat)
-    else:
-        await _trocarMensagem(update, context)
+    if chat is None:
+        return
+
+    if str(update.effective_chat.type) == "private":
+        if chat.aguardandoAssuntoDaConversa:
+            await _verificaOQueEstaSendoAguardado(update, context, chat)
+        else:
+            await _trocarMensagem(update, context)
+
+    elif str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot"):
+        if chat.aguardandoAssuntoDaConversa:
+            await _verificaOQueEstaSendoAguardado(update, context, chat)
+        else:
+            await _trocarMensagem(update, context)
 
 async def _trocarMensagem(update, context):
     conversa = await repository.ObterConversaAtualPorChatId(update.effective_chat.id)
@@ -37,7 +47,11 @@ async def _trocarMensagem(update, context):
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Você não iniciou nenhuma conversa ainda.")
         return
 
-    await repository.CadastrarMensagem(Mensagens(mensagem = update.effective_message.text, remetente = update.effective_chat.first_name, conversa = conversa.id))
+    message = str(update.effective_message.text)
+    if message.startswith("@ChatGPT_Oficial_Bot "):
+        message = message[len("@ChatGPT_Oficial_Bot "):]
+
+    await repository.CadastrarMensagem(Mensagens(mensagem = message, remetente = update.effective_user.first_name, conversa = conversa.id))
 
     mensagemComContexto = await _obterContextoDaConversa(conversa)
 
@@ -64,10 +78,19 @@ async def _verificaOQueEstaSendoAguardado(update, context, chat: Chats):
     if chat.aguardandoAssuntoDaConversa:
         chat.aguardandoAssuntoDaConversa = False
         await repository.AtualizarChat(chat)
-        await _cadastrarNovaConversa(update.effective_chat.id, update.effective_message.text, context.bot)
+
+        message = str(update.effective_message.text)
+        if message.startswith("@ChatGPT_Oficial_Bot "):
+            message = message[len("@ChatGPT_Oficial_Bot "):]
+
+        await _cadastrarNovaConversa(update.effective_chat.id, message, context.bot)
 
 async def listarConversas(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+
+    if chat is None:
+        return
+
     chat.aguardandoAssuntoDaConversa = False
     await repository.AtualizarChat(chat)
 
@@ -83,12 +106,20 @@ async def listarConversas(update, context):
 
 async def novaConversa(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+
+    if chat is None:
+        return
+
     chat.aguardandoAssuntoDaConversa = True
     await repository.AtualizarChat(chat)
     await _responderNoTelegram(context.bot, update.effective_chat.id, "Qual é o assunto da conversa?")
 
 async def apagarConversa(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+
+    if chat is None:
+        return
+
     chat.aguardandoAssuntoDaConversa = False
     await repository.AtualizarChat(chat)
 
@@ -107,6 +138,10 @@ async def apagarConversa(update, context):
 
 async def continuarConversa(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+
+    if chat is None:
+        return
+
     chat.aguardandoAssuntoDaConversa = False
     await repository.AtualizarChat(chat)
 
