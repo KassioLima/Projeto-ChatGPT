@@ -11,6 +11,7 @@ application.add_handler(CommandHandler("novaconversa", telegramService.novaConve
 application.add_handler(CommandHandler("minhasconversas", telegramService.listarConversas))
 application.add_handler(CommandHandler("apagarconversa", telegramService.apagarConversa))
 application.add_handler(CommandHandler("mudarconversa", telegramService.continuarConversa))
+application.add_handler(CommandHandler("gerarimagem", telegramService.gerarimagem))
 application.add_handler(MessageHandler(filters.TEXT, telegramService.mensagemRecebida))
 application.add_handler(CallbackQueryHandler(telegramService.callback_handler))
 

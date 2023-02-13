@@ -1,11 +1,12 @@
 import requests
 from transformers import GPT2Tokenizer
 from os import getenv
+import openai
+import pyshorteners
 
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 _LIMIT_TOKENS = 4096
 _LIMIT_TOKENS_PROMPT = int(_LIMIT_TOKENS / 2)
-
 
 def _contarTokens(text: str) -> int:
     tokens = tokenizer(text).data["input_ids"]
@@ -58,5 +59,23 @@ async def EnviarMensagem(mensagemRecebida: str) -> str:
             resposta = resposta[len("Resposta: "):]
     except:
         resposta = "Desculpe, não consegui pensar em uma resposta 😕"
+
+    return resposta
+
+async def GerarImagem(mensagemRecebida: str):
+    resposta = ""
+
+    try:
+        openai.api_key = getenv("CHAT_GPT_API_KEY")
+        result = openai.Image.create(
+            prompt = mensagemRecebida,
+            n=1,
+            size='1024x1024'
+        )
+
+        resposta = pyshorteners.Shortener().tinyurl.short(result['data'][0]['url'])
+
+    except:
+        resposta = "Desculpe, não consegui gerar a imagem 😕"
 
     return resposta

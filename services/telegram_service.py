@@ -15,6 +15,7 @@ async def start(update, context):
 
         if conversa is not None:
             chat.aguardandoAssuntoDaConversa = False
+            chat.aguardandoDescricaoImagem = False
             await repository.AtualizarChat(chat)
             await _responderNoTelegram(context.bot, update.effective_chat.id, "Estávamos falando sobre \"" + conversa.assunto + "\".\n\nPode me perguntar qualquer coisa.")
         else:
@@ -28,14 +29,8 @@ async def mensagemRecebida(update, context):
     if chat is None:
         return
 
-    if str(update.effective_chat.type) == "private":
-        if chat.aguardandoAssuntoDaConversa:
-            await _verificaOQueEstaSendoAguardado(update, context, chat)
-        else:
-            await _trocarMensagem(update, context)
-
-    elif str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot"):
-        if chat.aguardandoAssuntoDaConversa:
+    if str(update.effective_chat.type) == "private" or (str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot")):
+        if chat.aguardandoAssuntoDaConversa or chat.aguardandoDescricaoImagem:
             await _verificaOQueEstaSendoAguardado(update, context, chat)
         else:
             await _trocarMensagem(update, context)
@@ -85,6 +80,16 @@ async def _verificaOQueEstaSendoAguardado(update, context, chat: Chats):
 
         await _cadastrarNovaConversa(update.effective_chat.id, message, context.bot)
 
+    elif chat.aguardandoDescricaoImagem:
+        chat.aguardandoDescricaoImagem = False
+        await repository.AtualizarChat(chat)
+
+        message = str(update.effective_message.text)
+        if message.startswith("@ChatGPT_Oficial_Bot "):
+            message = message[len("@ChatGPT_Oficial_Bot "):]
+
+        await _gerarimagem(update.effective_chat.id, message, context.bot)
+
 async def listarConversas(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
@@ -92,6 +97,7 @@ async def listarConversas(update, context):
         return
 
     chat.aguardandoAssuntoDaConversa = False
+    chat.aguardandoDescricaoImagem = False
     await repository.AtualizarChat(chat)
 
     lista_conversas = ""
@@ -121,6 +127,7 @@ async def apagarConversa(update, context):
         return
 
     chat.aguardandoAssuntoDaConversa = False
+    chat.aguardandoDescricaoImagem = False
     await repository.AtualizarChat(chat)
 
     conversas = await repository.ObterConversasPorChatId(update.effective_chat.id)
@@ -143,6 +150,7 @@ async def continuarConversa(update, context):
         return
 
     chat.aguardandoAssuntoDaConversa = False
+    chat.aguardandoDescricaoImagem = False
     await repository.AtualizarChat(chat)
 
     conversas = await repository.ObterConversasPorChatId(update.effective_chat.id)
@@ -157,6 +165,17 @@ async def continuarConversa(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text("Escolha uma conversa:", reply_markup=reply_markup)
+
+async def gerarimagem(update, context):
+    chat = await repository.ObterChatPorChatId(update.effective_chat.id)
+
+    if chat is None:
+        return
+
+    chat.aguardandoAssuntoDaConversa = False
+    chat.aguardandoDescricaoImagem = True
+    await repository.AtualizarChat(chat)
+    await _responderNoTelegram(context.bot, update.effective_chat.id, "Descreva a imagem que você quer gerar")
 
 async def callback_handler(update, context):
     objeto = json.loads(update.callback_query.data)
@@ -184,6 +203,10 @@ async def _cadastrarNovaConversa(chat_id, assunto, bot):
     await repository.RemoverAssuntoAtual(chat_id)
     await repository.CadastrarConversa(Conversas(chat_id=chat_id, assunto=assunto, assuntoAtual=True))
     await _responderNoTelegram(bot, chat_id, "Agora estamos falando sobre \"" + assunto + "\".\n\nPode me perguntar qualquer coisa.")
+
+async def _gerarimagem(chat_id, descricaoImagem, bot):
+    resposta = await open_ai.GerarImagem(descricaoImagem)
+    await _responderNoTelegram(bot, chat_id, resposta)
 
 async def _apagarConversa(update, context, conversa_id):
     conversa = await repository.ObterConversaPorId(conversa_id)
