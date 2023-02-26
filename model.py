@@ -15,7 +15,6 @@ class Chats(BaseModel):
 
 class Conversas(BaseModel):
     id = peewee.PrimaryKeyField()
-    chat = peewee.ForeignKeyField(Chats, to_field='chat_id')
     chat_id = peewee.IntegerField(null=False)
     assunto = peewee.CharField(null=False)
     assuntoAtual = peewee.BooleanField(null=False)
@@ -25,7 +24,6 @@ class Mensagens(BaseModel):
     mensagem = peewee.CharField(null=False)
     remetente = peewee.CharField(null=False)
     timestamp = peewee.DateTimeField(default=datetime.datetime.now, null=False)
-    conversa = peewee.ForeignKeyField(Conversas, to_field='id', null=False)
     conversa_id = peewee.IntegerField(null=False)
 
 
