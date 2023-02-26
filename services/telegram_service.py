@@ -46,12 +46,12 @@ async def _trocarMensagem(update, context):
     if message.startswith("@ChatGPT_Oficial_Bot "):
         message = message[len("@ChatGPT_Oficial_Bot "):]
 
-    await repository.CadastrarMensagem(Mensagens(mensagem = message, remetente = update.effective_user.first_name, conversa = conversa.id))
+    await repository.CadastrarMensagem(Mensagens(mensagem = message, remetente = update.effective_user.first_name, conversa_id=conversa.id))
 
     mensagemComContexto = await _obterContextoDaConversa(conversa)
 
     resposta = await open_ai.EnviarMensagem(mensagemComContexto)
-    await repository.CadastrarMensagem(Mensagens(mensagem=resposta, remetente="Chat GPT", conversa=conversa.id))
+    await repository.CadastrarMensagem(Mensagens(mensagem=resposta, remetente="Chat GPT", conversa_id=conversa.id))
 
     while len(resposta) > 0:
         await _responderNoTelegram(context.bot, update.effective_chat.id, resposta[:4096])
@@ -136,7 +136,7 @@ async def apagarConversa(update, context):
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Você não iniciou nenhuma conversa ainda.")
         return
 
-    keyboard = [[InlineKeyboardButton(conversa.assunto + (" (Atual)" if conversa.assuntoAtual else ""), callback_data='{"action": "apagar-conversa", "value": "'+str(conversa.id)+'"}')] for conversa in conversas]
+    keyboard = [[InlineKeyboardButton(conversa.assunto + (" (Atual)" if conversa.assuntoAtual else ""), callback_data='{"action": "apagar-conversa", "value": "' + str(conversa.id) + '"}')] for conversa in conversas]
     keyboard.append([InlineKeyboardButton("Cancelar", callback_data='{"action": "cancelar", "value": "None"}')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -195,7 +195,7 @@ async def callback_handler(update, context):
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Ação cancelada.")
 
     try:
-        await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.id)
+        await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.chat_id)
     except:
         print("Não foi possível apagar a mensagem")
 
