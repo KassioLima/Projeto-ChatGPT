@@ -28,9 +28,8 @@ async def mensagemRecebida(update, context):
 
     if chat is None:
         await start(update, context)
-        return
 
-    if str(update.effective_chat.type) == "private" or (str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot")):
+    elif str(update.effective_chat.type) == "private" or (str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot")):
         if chat.aguardandoAssuntoDaConversa or chat.aguardandoDescricaoImagem:
             await _verificaOQueEstaSendoAguardado(update, context, chat)
         else:
