@@ -1,11 +1,11 @@
 from model import Conversas, Chats, Mensagens
 
 async def ObterChatPorChatId(chat_id: int):
-    chat = Chats.select().where(Chats.id == chat_id).get_or_none()
+    chat = Chats.select().where(Chats.chat_id == chat_id).get_or_none()
     return chat
 
 async def CadastrarChat(chat: Chats):
-    Chats.create(chat_id = chat.id, aguardandoAssuntoDaConversa = chat.aguardandoAssuntoDaConversa)
+    Chats.create(chat_id = chat.chat_id, aguardandoAssuntoDaConversa = chat.aguardandoAssuntoDaConversa)
 
 async def AtualizarChat(chat: Chats) -> int:
     return chat.save()

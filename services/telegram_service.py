@@ -11,7 +11,7 @@ async def start(update, context):
         await repository.CadastrarChat(Chats(chat_id = update.effective_chat.id, aguardandoAssuntoDaConversa = True))
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Olá! Eu sou um bot do Telegram.\n\nSobre que você quer falar?")
     else:
-        conversa = await repository.ObterConversaAtualPorChatId(chat.id)
+        conversa = await repository.ObterConversaAtualPorChatId(chat.chat_id)
 
         if conversa is not None:
             chat.aguardandoAssuntoDaConversa = False
