@@ -1,6 +1,5 @@
 import datetime
 import peewee
-from peewee import BooleanField
 
 db = peewee.SqliteDatabase('BDconversas.db')
 
@@ -9,13 +8,12 @@ class BaseModel(peewee.Model):
         database = db
 
 class Chats(BaseModel):
-    chat_id = peewee.PrimaryKeyField(null=False)
+    id = peewee.PrimaryKeyField(null=False)
     aguardandoAssuntoDaConversa = peewee.BooleanField(default=False, null=False)
     aguardandoDescricaoImagem = peewee.BooleanField(default=False, null=False)
 
 class Conversas(BaseModel):
     id = peewee.PrimaryKeyField()
-    chat = peewee.ForeignKeyField(Chats, to_field='chat_id')
     chat_id = peewee.IntegerField(null=False)
     assunto = peewee.CharField(null=False)
     assuntoAtual = peewee.BooleanField(null=False)
@@ -25,7 +23,6 @@ class Mensagens(BaseModel):
     mensagem = peewee.CharField(null=False)
     remetente = peewee.CharField(null=False)
     timestamp = peewee.DateTimeField(default=datetime.datetime.now, null=False)
-    conversa = peewee.ForeignKeyField(Conversas, to_field='id', null=False)
     conversa_id = peewee.IntegerField(null=False)
 
 

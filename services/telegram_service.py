@@ -11,7 +11,7 @@ async def start(update, context):
         await repository.CadastrarChat(Chats(chat_id = update.effective_chat.id, aguardandoAssuntoDaConversa = True))
         await _responderNoTelegram(context.bot, update.effective_chat.id, "Olá! Eu sou um bot do Telegram.\n\nSobre que você quer falar?")
     else:
-        conversa = await repository.ObterConversaAtualPorChatId(chat.chat_id)
+        conversa = await repository.ObterConversaAtualPorChatId(chat.id)
 
         if conversa is not None:
             chat.aguardandoAssuntoDaConversa = False
@@ -27,6 +27,7 @@ async def mensagemRecebida(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
     if chat is None:
+        await start(update, context)
         return
 
     if str(update.effective_chat.type) == "private" or (str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot")):
