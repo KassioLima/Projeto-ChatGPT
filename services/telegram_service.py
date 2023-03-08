@@ -237,3 +237,4 @@ async def _responderNoTelegram(bot, chat_id, mensagem):
     except:
         print("Erro ao enviar mensagem no Telegram. Tentando novamente")
         await _responderNoTelegram(bot, chat_id, mensagem)
+        
