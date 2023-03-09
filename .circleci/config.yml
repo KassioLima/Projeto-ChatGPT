@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Run
           # This assumes pytest is installed via the install-package step above
-          command: main.py
+          command: python main.py
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
