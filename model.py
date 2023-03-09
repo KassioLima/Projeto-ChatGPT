@@ -1,8 +1,11 @@
 import datetime
 import peewee
-from peewee import BooleanField
+from os import getenv
+from dotenv import load_dotenv
 
-db = peewee.SqliteDatabase('BDconversas.db')
+load_dotenv()
+
+db = peewee.MySQLDatabase(getenv("DATABASE_NAME"), user=getenv("DATABASE_USER"), password=getenv("DATABASE_PASSWORD"), host=getenv("DATABASE_HOST"), port=3306)
 
 class BaseModel(peewee.Model):
     class Meta:
