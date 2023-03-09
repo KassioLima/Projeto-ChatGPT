@@ -15,4 +15,4 @@ application.add_handler(CommandHandler("gerarimagem", telegramService.gerarimage
 application.add_handler(MessageHandler(filters.TEXT, telegramService.mensagemRecebida))
 application.add_handler(CallbackQueryHandler(telegramService.callback_handler))
 
-application.run_polling() 
+application.run_polling()
