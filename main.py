@@ -17,14 +17,12 @@ application.add_handler(CommandHandler("gerarimagem", telegramService.gerarimage
 application.add_handler(MessageHandler(filters.TEXT, telegramService.mensagemRecebida))
 application.add_handler(CallbackQueryHandler(telegramService.callback_handler))
 
-
 class FlaskThread(Thread):
     def __init__(self):
         Thread.__init__(self)
 
     def run(self):
         Flask(__name__).run(host='0.0.0.0', port=8081)
-
 
 FlaskThread().start()
 application.run_polling()
