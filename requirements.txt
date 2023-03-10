@@ -7,6 +7,6 @@ pyshorteners
 openai
 mysql-connector-python
 mysql
-mysqlclient
+#mysqlclient
 pymysql
 MySQL-python
