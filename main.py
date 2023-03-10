@@ -3,7 +3,6 @@ from os import getenv
 from dotenv import load_dotenv
 from services import telegram_service as telegramService
 from threading import Thread
-import time
 from flask import Flask
 
 load_dotenv()
