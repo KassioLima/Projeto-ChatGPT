@@ -8,5 +8,5 @@ openai
 #mysql-connector-python
 #mysql
 #mysqlclient
-#pymysql
+pymysql
 #MySQL-python
