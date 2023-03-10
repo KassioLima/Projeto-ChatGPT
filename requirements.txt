@@ -6,3 +6,4 @@ requests
 pyshorteners
 openai
 pymysql
+flask
