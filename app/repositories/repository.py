@@ -1,4 +1,4 @@
-from model import Conversas, Chats, Mensagens
+from app.model import Conversas, Chats, Mensagens
 
 async def ObterChatPorChatId(chat_id: int):
     chat = Chats.select().where(Chats.chat_id == chat_id).get_or_none()
