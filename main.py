@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from services import telegram_service as telegramService
 from threading import Thread
 import time
+from flask import Flask
 
 load_dotenv()
 application = Application.builder().token(getenv("TELEGRAM_BOT_KEY")).build()
@@ -18,29 +19,13 @@ application.add_handler(MessageHandler(filters.TEXT, telegramService.mensagemRec
 application.add_handler(CallbackQueryHandler(telegramService.callback_handler))
 
 
-class Th(Thread):
+class FlaskThread(Thread):
     def __init__(self):
         Thread.__init__(self)
 
     def run(self):
-
-        from flask import Flask
-
-        app = Flask(__name__)
-
-        @app.route('/')
-        def hello_world():  # put application's code here
-            return 'Hello World!'
-
-        if __name__ == '__main__':
-            app.run(host='0.0.0.0', port=8081)
-
-        while True:
-            print("Rodando " + str(time.time()))
-            time.sleep(5)
+        Flask(__name__).run(host='0.0.0.0', port=8081)
 
 
-Th().start()
-
-
+FlaskThread().start()
 application.run_polling()
