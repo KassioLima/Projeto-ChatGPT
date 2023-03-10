@@ -1,8 +1,8 @@
 import json
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from app.infra.model import Chats, Conversas, Mensagens
-from app.repositories import repository
-import app.services.open_ai_service as open_ai
+from model import Chats, Conversas, Mensagens
+from repositories import repository
+import services.open_ai_service as open_ai
 
 async def start(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
