@@ -6,4 +6,10 @@ class FlaskThread(Thread):
         Thread.__init__(self)
 
     def run(self):
-        Flask(__name__).run(host='0.0.0.0', port=8081)
+        app = Flask(__name__)
+
+        @app.route('/')
+        def hello_world():
+            return 'CHatGPT Telegram Bot is running!'
+
+        app.run(host='0.0.0.0', port=8081)
