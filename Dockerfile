@@ -7,7 +7,7 @@ RUN pip3 install -r requirements.txt
 
 COPY . /app
 
-EXPOSE 80/tcp
+#EXPOSE 80/tcp
 EXPOSE 443/tcp
 
 CMD ["python", "main.py"]
