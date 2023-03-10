@@ -1,6 +1,6 @@
 import json
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from model import Chats, Conversas, Mensagens
+from infra.model import Chats, Conversas, Mensagens
 from repositories import repository
 import services.open_ai_service as open_ai
 
