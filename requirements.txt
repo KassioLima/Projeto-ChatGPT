@@ -5,8 +5,8 @@ python-dotenv
 requests
 pyshorteners
 openai
-mysql-connector-python
-mysql
+#mysql-connector-python
+#mysql
 #mysqlclient
-pymysql
+#pymysql
 #MySQL-python
