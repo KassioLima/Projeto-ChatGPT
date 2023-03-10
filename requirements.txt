@@ -9,4 +9,4 @@ mysql-connector-python
 mysql
 #mysqlclient
 pymysql
-MySQL-python
+#MySQL-python
