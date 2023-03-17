@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-db = peewee.MySQLDatabase(getenv("DATABASE_NAME"), user=getenv("DATABASE_USER"), password=getenv("DATABASE_PASSWORD"), host=getenv("DATABASE_HOST"), port=3306)
+db = peewee.MySQLDatabase(getenv("DATABASE_NAME"), user=getenv("DATABASE_USER"), password=getenv("DATABASE_PASSWORD"), host=getenv("DATABASE_HOST"), port=3306, autoconnect=True)
 
 class BaseModel(peewee.Model):
     class Meta:
