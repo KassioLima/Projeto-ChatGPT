@@ -27,9 +27,12 @@ async def mensagemRecebida(update, context):
     chat = await repository.ObterChatPorChatId(update.effective_chat.id)
 
     if chat is None:
-        await start(update, context)
+        if not _ehGrupo(update):
+            await start(update, context)
+        elif _falouComOBot(update):
+            await start(update, context)
 
-    elif str(update.effective_chat.type) == "private" or (str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot")):
+    elif _ehPrivado(update) or (_ehGrupo(update) and _falouComOBot(update)):
         if chat.aguardandoAssuntoDaConversa or chat.aguardandoDescricaoImagem:
             await _verificaOQueEstaSendoAguardado(update, context, chat)
         else:
@@ -236,3 +239,12 @@ async def _responderNoTelegram(bot, chat_id, mensagem):
         await bot.send_message(chat_id=chat_id, text=mensagem)
     except:
         print("Erro ao enviar mensagem no Telegram. Tentando novamente")
+
+def _ehPrivado(update):
+    return str(update.effective_chat.type) == "private"
+
+def _ehGrupo(update):
+    return "group" in str(update.effective_chat.type)
+
+def _falouComOBot(update):
+    return str(update.effective_message.text).startswith("@ChatGPT_Oficial_Bot ") or (update.effective_message.reply_to_message is not None and update.effective_message.reply_to_message.from_user.username == "ChatGPT_Oficial_Bot")
