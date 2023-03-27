@@ -7,4 +7,3 @@ pyshorteners
 openai
 pymysql
 flask
-functools
