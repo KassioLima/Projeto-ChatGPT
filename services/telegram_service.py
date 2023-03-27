@@ -1,7 +1,7 @@
 import json
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from infra.model import Chats, Conversas, Mensagens
-from repositories import repository
+from repositories.repository import Repository as repository
 import services.open_ai_service as open_ai
 
 async def start(update, context):
