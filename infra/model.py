@@ -30,6 +30,6 @@ class Mensagens(BaseModel):
     conversa_id = peewee.IntegerField(null=False)
 
 
-Conversas.create_table()
-Mensagens.create_table()
-Chats.create_table()
+# Conversas.create_table()
+# Mensagens.create_table()
+# Chats.create_table()
